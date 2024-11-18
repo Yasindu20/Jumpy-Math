@@ -1,9 +1,7 @@
 import { bgSoundManager } from "./BGSoundManager.js"
 import { registerUser } from "./auth.js";
 import { loginUser, getUserData } from "./auth.js";
-import { loadGame } from "./auth.js";
-
-let currentLevel = 1;
+import { gameSaveManager } from "./gameSaveManager.js";
 
 class UI {
   constructor() {
@@ -260,7 +258,6 @@ class UI {
         const data = await getUserData(user.uid);
         if (data) {
           alert(`Welcome back, ${username}!`);
-          currentLevel = data.currentLevel || 1; // Load saved level or default to 1
           go("menu");
           this.cleanupElements();
         }
@@ -302,18 +299,20 @@ class UI {
       scale(1.75), //2 times its original size
     ])
 
+    if (gameSaveManager.isLoggedIn()) {
+      this.addButton("Load Game", { x: center().x, y: 350 }, async () => {
+        const savedState = await gameSaveManager.loadGameState();
+        if (savedState && savedState.currentLevel) {
+          go(savedState.currentLevel);
+        } else {
+          alert("No saved game found. Starting new game...");
+          go("controls");
+        }
+      });
+    }
+
     // Buttons for the main menu
     this.addButton("New Game", { x: center().x, y: 250 }, () => go("controls"));
-    this.addButton("Load Game", { x: center().x, y: 350 }, async () => {
-      const savedLevel = await loadGame(); // Retrieve saved level from Firestore
-      if (savedLevel !== null) { // Ensure a level is returned
-        currentLevel = savedLevel; // Set the current level to the saved level
-        console.log(`Loaded saved level: ${currentLevel}`);
-        go(`${currentLevel}`); // Navigate to the saved level
-      } else {
-        alert("No saved game found.");
-      }
-    });
     this.addButton("Settings", { x: center().x, y: 450 }, () => this.displaySettingsMenu());
     this.addButton("Credits", { x: center().x, y: 550 }, () => this.displayCreditsMenu());
     this.addButton("Quit Game", { x: center().x, y: 650 }, () => kaboom().quit());

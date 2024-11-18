@@ -45,29 +45,3 @@ export async function getUserData(uid) {
         return null;
     }
 }
-
-// Save game progress (current level) to Firestore
-export async function saveProgress(uid, level) {
-    try {
-        await setDoc(doc(db, "users", uid), { currentLevel: level }, { merge: true });
-        console.log(`Progress saved: Level ${level}`);
-    } catch (error) {
-        console.error("Error saving progress:", error.message);
-    }
-}
-
-// Load game progress (current level) from Firestore
-export async function loadGame() {
-    const user = auth.currentUser;
-    if (user) {
-        try {
-            const userData = await getUserData(user.uid);
-            return userData ? userData.currentLevel || 1 : 1; // Default to level 1 if no data found
-        } catch (error) {
-            console.error("Error loading game:", error.message);
-        }
-    } else {
-        console.log("No user is logged in.");
-        return null;
-    }
-}

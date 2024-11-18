@@ -13,6 +13,8 @@ async function fetchMathProblem() {
   }
 }
 
+import { gameSaveManager } from "../utils/gameSaveManager.js";
+
 export class Player {
   heightDelta = 0 //Tracks the difference in player's height to detect movement
   isMoving = false //track player movement
@@ -400,10 +402,15 @@ export class Player {
   //Update the player's coin count and check level completion
   updateCoinCount(coinCountUI) {
     onUpdate(() => {
-      coinCountUI.text = `${this.coins} / ${coinCountUI.fullCoinCount}` //Display coin count
-      // If all coins are collected, go to next level or end game
+      coinCountUI.text = `${this.coins} / ${coinCountUI.fullCoinCount}`
+      // If all coins are collected, save progress and go to next level
       if (this.coins === coinCountUI.fullCoinCount) {
-        go(this.isInTerminalScene ? "end" : this.currentLevelScene + 1)
+        // Save progress before moving to next level
+        const nextLevel = this.isInTerminalScene ? "end" : this.currentLevelScene + 1;
+        if (!this.isInTerminalScene) {
+          gameSaveManager.saveGameState(this.currentLevelScene + 1);
+        }
+        go(nextLevel);
       }
     })
   }
