@@ -9,6 +9,144 @@ class UI {
     this.password = ""; // Store password
     this.showPassword = false; // Password visibility state
     this.uiElements = []; // Array to store all created UI elements
+    this.isPaused = false; // Track pause state
+  }
+
+  displayPauseMenu() {
+    if (!this.isPaused) return;
+
+    // Add semi-transparent dark overlay
+    const overlay = add([
+      rect(width(), height()),
+      color(0, 0, 0),
+      opacity(0.7),
+      fixed(),
+      z(100),
+      "pauseOverlay"
+    ]);
+
+    // Add pause menu title
+    const pauseTitle = add([
+      text("PAUSED", {
+        font: "Round",
+        size: 64,
+        color: rgb(255, 255, 255)
+      }),
+      pos(center().x, center().y - 150),
+      anchor("center"),
+      fixed(),
+      z(101),
+      "pauseMenu"
+    ]);
+
+    // Add pause menu buttons
+    this.addPauseButton("Resume", { x: center().x, y: center().y }, () => {
+      this.resumeGame();
+    });
+
+    this.addPauseButton("Save Game", { x: center().x, y: center().y + 80 }, async () => {
+      if (gameSaveManager.isLoggedIn()) {
+        await gameSaveManager.saveGameState();
+        alert("Game saved successfully!");
+      } else {
+        alert("Please log in to save your game.");
+      }
+    });
+
+    this.addPauseButton("Settings", { x: center().x, y: center().y + 160 }, () => {
+      // Add settings functionality here
+      this.displaySettingsMenu();
+    });
+
+    this.addPauseButton("Main Menu", { x: center().x, y: center().y + 240 }, () => {
+      if (confirm("Are you sure you want to return to the main menu? Unsaved progress will be lost.")) {
+        this.resumeGame();
+        go("menu");
+      }
+    });
+
+    // Store pause menu elements for cleanup
+    this.uiElements.push(overlay);
+    this.uiElements.push(pauseTitle);
+  }
+
+  addPauseButton(label, position, onClick) {
+    const button = add([
+      text(label, {
+        size: 32,
+        font: "Round",
+        color: rgb(255, 255, 255)
+      }),
+      pos(position.x, position.y),
+      area(),
+      anchor("center"),
+      fixed(),
+      z(101),
+      scale(1),
+      "pauseMenu",
+      {
+        isHovered: false,
+        clickAction: onClick,
+      },
+    ]);
+
+    button.onUpdate(() => {
+      if (button.isHovered) {
+        button.color = rgb(255, 215, 0);
+        button.scaleTo(1.2);
+      } else {
+        button.color = rgb(255, 255, 255);
+        button.scaleTo(1);
+      }
+    });
+
+    button.onHover(() => {
+      button.isHovered = true;
+    });
+
+    button.onClick(() => {
+      play("confirm-ui", { speed: 1.5 });
+      button.clickAction();
+    });
+
+    button.onHoverEnd(() => {
+      button.isHovered = false;
+    });
+
+    this.uiElements.push(button);
+  }
+
+  pauseGame() {
+    if (!this.isPaused) {
+      this.isPaused = true;
+      get((obj) => {
+        if (obj.paused !== undefined) {
+          obj.paused = true;
+        }
+      });
+      this.displayPauseMenu();
+    }
+  }
+
+  resumeGame() {
+    if (this.isPaused) {
+      this.isPaused = false;
+      get((obj) => {
+        if (obj.paused !== undefined) {
+          obj.paused = false;
+        }
+      });
+      destroyAll("pauseOverlay");
+      destroyAll("pauseMenu");
+    }
+  }
+
+  togglePause() {
+    if (this.isPaused) {
+      this.resumeGame();
+    } else {
+      this.pauseGame();
+    }
   }
 
   // Create a text input field
@@ -364,7 +502,7 @@ class UI {
   // Handles UI button clicks
   handleButtonClicks() {
     onClick(() => {
-      every("ui", (btn) => {
+      get("ui").forEach((btn) => {
         if (btn.isHovering() && mouseClick()) {
           btn.clickAction();
         }
