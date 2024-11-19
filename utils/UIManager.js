@@ -53,13 +53,8 @@ class UI {
       }
     });
 
-    this.addPauseButton("Settings", { x: center().x, y: center().y + 160 }, () => {
-      // Add settings functionality here
-      this.displaySettingsMenu();
-    });
-
-    this.addPauseButton("Main Menu", { x: center().x, y: center().y + 240 }, () => {
-      if (confirm("Are you sure you want to return to the main menu? Unsaved progress will be lost.")) {
+    this.addPauseButton("Main Menu", { x: center().x, y: center().y + 160 }, () => {
+      if (confirm("Are you sure you want to return to the main menu?")) {
         this.resumeGame();
         go("menu");
       }
@@ -119,7 +114,8 @@ class UI {
   pauseGame() {
     if (!this.isPaused) {
       this.isPaused = true;
-      get((obj) => {
+      // Pause all game objects that can be paused
+      get("*").forEach((obj) => {
         if (obj.paused !== undefined) {
           obj.paused = true;
         }
@@ -131,7 +127,8 @@ class UI {
   resumeGame() {
     if (this.isPaused) {
       this.isPaused = false;
-      get((obj) => {
+      // Resume all game objects that can be paused
+      get("*").forEach((obj) => {
         if (obj.paused !== undefined) {
           obj.paused = false;
         }

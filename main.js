@@ -114,7 +114,7 @@ const scenes = {
       UIManager.togglePause();
     });
     onUpdate(() => {
-      if (player.gameObj && (player.gameObj.paused || UIManager.isPaused)) {
+      if (player.gameObj && player.gameObj.paused) {
         get("player").forEach((p) => {
           p.paused = true;
         });
@@ -192,6 +192,9 @@ const scenes = {
     if (player.lives === 0) {
       player.respawnPlayer(); // This will handle fetching the API and displaying the question
     }
+    onKeyPress("escape", () => {
+      UIManager.togglePause();
+    });
     onUpdate(() => {
       if (player.gameObj && player.gameObj.paused) {
         get("player").forEach((p) => {
@@ -248,6 +251,9 @@ const scenes = {
     if (player.lives === 0) {
       player.respawnPlayer(); // This will handle fetching the API and displaying the question
     }
+    onKeyPress("escape", () => {
+      UIManager.togglePause();
+    });
     onUpdate(() => {
       if (player.gameObj && player.gameObj.paused) {
         get("player").forEach((p) => {
