@@ -1,5 +1,6 @@
 import { auth, db } from "./firebase.js";
 import { doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
+import { leaderboardManager } from "./LeaderboardManager.js";
 
 export class GameSaveManager {
     constructor() {
@@ -27,7 +28,15 @@ export class GameSaveManager {
                 currentLevel: level,
                 lastSaved: new Date().toISOString()
             });
-            console.log("Game progress saved successfully");
+
+            // Update leaderboard when saving game state
+            await leaderboardManager.updateLeaderboard(
+                this.currentUser.uid,
+                this.currentUser.email,
+                level
+            );
+
+            console.log("Game progress and leaderboard updated successfully");
             return true;
         } catch (error) {
             console.error("Error saving game progress:", error);

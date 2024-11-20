@@ -1,7 +1,9 @@
+import kaboom from "../../libs/kaboom.mjs";
 import { bgSoundManager } from "./BGSoundManager.js"
 import { registerUser } from "./auth.js";
 import { loginUser, getUserData } from "./auth.js";
 import { gameSaveManager } from "./gameSaveManager.js";
+import { leaderboardManager } from "./LeaderboardManager.js";
 
 class UI {
   constructor() {
@@ -448,9 +450,98 @@ class UI {
 
     // Buttons for the main menu
     this.addButton("New Game", { x: center().x, y: 250 }, () => go("controls"));
-    this.addButton("Settings", { x: center().x, y: 450 }, () => this.displaySettingsMenu());
+    this.addButton("Leaderboard", { x: center().x, y: 450 }, () => this.displayLeaderboard());
     this.addButton("Credits", { x: center().x, y: 550 }, () => this.displayCreditsMenu());
     this.addButton("Quit Game", { x: center().x, y: 650 }, () => kaboom().quit());
+  }
+
+  displayLeaderboard() {
+    this.cleanupElements();
+    add([sprite("main-background"), scale(1.25)]);
+
+    add([
+      text("Leaderboard", {
+        font: "Round",
+        size: 50,
+        color: rgb(255, 215, 0)
+      }),
+      anchor("center"),
+      pos(center().x, center().y - 300),
+    ]);
+
+    // Initialize leaderboard listening
+    leaderboardManager.initializeLeaderboard();
+
+    // Create leaderboard container
+    const leaderboardContainer = add([
+      rect(600, 400),
+      color(0, 0, 0),
+      opacity(0.8),
+      anchor("center"),
+      pos(center()),
+      "leaderboardContainer"
+    ]);
+
+    // Update leaderboard display
+    let lastUpdate = 0;
+    leaderboardContainer.onUpdate(() => {
+      const now = time();
+      if (now - lastUpdate > 1) { // Update every second
+        lastUpdate = now;
+        this.updateLeaderboardDisplay(leaderboardContainer);
+      }
+    });
+
+    this.addButton("Back", { x: center().x, y: 620 }, () => {
+      go("menu");
+      this.cleanupElements();
+    });
+  }
+
+  updateLeaderboardDisplay(container) {
+    // Clear existing entries
+    destroyAll("leaderboardEntry");
+
+    const leaderboardData = leaderboardManager.getLeaderboardData();
+    leaderboardData.forEach((entry, index) => {
+      const yPos = center().y - 150 + (index * 40);
+
+      // Rank number
+      add([
+        text(`${index + 1}.`, {
+          font: "Round",
+          size: 24,
+          color: rgb(255, 255, 255)
+        }),
+        pos(center().x - 250, yPos),
+        anchor("left"),
+        "leaderboardEntry"
+      ]);
+
+      // Player name
+      add([
+        text(entry.username.split('@')[0], {
+          font: "Round",
+          size: 24,
+          color: rgb(255, 255, 255)
+        }),
+        pos(center().x - 150, yPos),
+        anchor("left"),
+        "leaderboardEntry"
+      ]);
+
+      // Level completed
+      add([
+        text(`Level ${entry.levelCompleted}`, {
+          font: "Round",
+          size: 24,
+          color: rgb(255, 215, 0)
+        }),
+        pos(center().x + 150, yPos),
+        anchor("left"),
+        "leaderboardEntry"
+      ]);
+    });
   }
 
 
