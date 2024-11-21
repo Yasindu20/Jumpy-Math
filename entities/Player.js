@@ -399,18 +399,128 @@ export class Player {
     })
   }
 
+  async fetchDadJoke() {
+    try {
+      const response = await fetch('https://icanhazdadjoke.com/', {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch dad joke');
+      }
+
+      const data = await response.json();
+      return data.joke;
+    } catch (error) {
+      console.error('Error fetching dad joke:', error);
+      return 'Why did the programmer quit his job? Because he didn\'t get arrays! (Backup joke)';
+    }
+  }
+
+  displayDadJoke(joke, nextLevel) {
+
+    // Pause the game
+    this.gameObj.paused = true;
+    get("player").forEach((p) => {
+      p.paused = true;
+    });
+
+    // Create full-screen overlay similar to math problem modal
+    const overlay = document.createElement("div");
+    overlay.id = "dad-joke-modal";
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100vw";
+    overlay.style.height = "100vh";
+    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
+    overlay.style.display = "flex";
+    overlay.style.flexDirection = "column";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.zIndex = "1000";
+    overlay.style.fontFamily = "'Press Start 2P', cursive";
+    overlay.style.color = "#00ff00";
+    overlay.style.padding = "20px";
+    overlay.style.textAlign = "center";
+
+    // Dad Joke Title
+    const title = document.createElement("h1");
+    title.textContent = "Dad Joke Unlocked!";
+    title.style.marginBottom = "30px";
+    title.style.fontSize = "24px";
+    overlay.appendChild(title);
+
+    // Joke Text
+    const jokeText = document.createElement("p");
+    jokeText.textContent = joke;
+    jokeText.style.fontSize = "18px";
+    jokeText.style.maxWidth = "80%";
+    jokeText.style.lineHeight = "1.5";
+    overlay.appendChild(jokeText);
+
+    // Continue Button
+    const continueButton = document.createElement("button");
+    continueButton.textContent = "Continue";
+    continueButton.style.padding = "15px 30px";
+    continueButton.style.marginTop = "30px";
+    continueButton.style.backgroundColor = "#00ccff";
+    continueButton.style.border = "none";
+    continueButton.style.color = "#222";
+    continueButton.style.borderRadius = "8px";
+    continueButton.style.fontSize = "18px";
+    continueButton.style.cursor = "pointer";
+    continueButton.style.fontFamily = "'Press Start 2P', cursive";
+    continueButton.style.transition = "background-color 0.3s, transform 0.2s";
+
+    // Hover effects for continue button
+    continueButton.onmouseover = () => {
+      continueButton.style.backgroundColor = "#0077cc";
+      continueButton.style.transform = "scale(1.05)";
+    };
+    continueButton.onmouseout = () => {
+      continueButton.style.backgroundColor = "#00ccff";
+      continueButton.style.transform = "scale(1)";
+    };
+
+    continueButton.onclick = () => {
+
+      // Unpause the game
+      this.gameObj.paused = false;
+      get("player").forEach((p) => {
+        p.paused = false;
+      });
+
+      document.body.removeChild(overlay);
+    };
+
+    overlay.appendChild(continueButton);
+
+    // Add the overlay to the document body
+    document.body.appendChild(overlay);
+  }
+
   //Update the player's coin count and check level completion
   updateCoinCount(coinCountUI) {
-    onUpdate(() => {
+    onUpdate(async () => {
       coinCountUI.text = `${this.coins} / ${coinCountUI.fullCoinCount}`
       // If all coins are collected, save progress and go to next level
       if (this.coins === coinCountUI.fullCoinCount) {
-        // Save progress before moving to next level
         const nextLevel = this.isInTerminalScene ? "end" : this.currentLevelScene + 1;
+
+        // Save progress before moving to next level
         if (!this.isInTerminalScene) {
           gameSaveManager.saveGameState(this.currentLevelScene + 1);
         }
+
+        // Go to next level first
         go(nextLevel);
+
+        // Fetch dad joke and display after level transition
+        const dadJoke = await this.fetchDadJoke();
+        this.displayDadJoke(dadJoke, nextLevel);
       }
     })
   }
