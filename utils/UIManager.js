@@ -323,8 +323,15 @@ class UI {
       pos(center().x, center().y - 200),
     ]);
 
-    this.addButton("Sign Up", { x: center().x, y: 300 }, () => go("signup"));
-    this.addButton("Login", { x: center().x, y: 400 }, () => go("login"));
+    this.addButton("Sign Up", { x: center().x, y: 300 }, () => {
+      play("confirm-ui");
+      go("signup");
+    });
+
+    this.addButton("Login", { x: center().x, y: 400 }, () => {
+      play("confirm-ui");
+      go("login");
+    });
   }
 
 
@@ -353,6 +360,7 @@ class UI {
       if (user) {
         alert(`Account created for ${username}!`);
         go("menu");
+        play("confirm-ui");
         this.cleanupElements();
       } else {
         alert("Error creating account. Please try again.");
@@ -361,10 +369,12 @@ class UI {
 
     this.addButton("Already have an account? Login", { x: center().x, y: 550 }, () => {
       go("login");
+      play("confirm-ui");
       this.cleanupElements();
     });
 
     this.addButton("Back", { x: center().x, y: 650 }, () => {
+      play("confirm-ui");
       go("createAccount");
       this.cleanupElements();
     });
@@ -396,6 +406,7 @@ class UI {
         const data = await getUserData(user.uid);
         if (data) {
           alert(`Welcome back, ${username}!`);
+          play("confirm-ui");
           go("menu");
           this.cleanupElements();
         }
@@ -405,6 +416,7 @@ class UI {
     });
 
     this.addButton("Back", { x: center().x, y: 500 }, () => {
+      play("confirm-ui");
       go("createAccount");
       this.cleanupElements();
     });
@@ -430,16 +442,32 @@ class UI {
           go(savedState.currentLevel);
         } else {
           alert("No saved game found. Starting new game...");
+          play("confirm-ui");
           go("controls");
         }
       });
     }
 
     // Buttons for the main menu
-    this.addButton("New Game", { x: center().x, y: 250 }, () => go("controls"));
-    this.addButton("Leaderboard", { x: center().x, y: 450 }, () => this.displayLeaderboard());
-    this.addButton("Credits", { x: center().x, y: 550 }, () => this.displayCreditsMenu());
-    this.addButton("Quit Game", { x: center().x, y: 650 }, () => go("createAccount"));
+    this.addButton("New Game", { x: center().x, y: 250 }, () => {
+      play("confirm-ui");
+      go("controls");
+    });
+
+    this.addButton("Leaderboard", { x: center().x, y: 450 }, () => {
+      play("confirm-ui");
+      this.displayLeaderboard();
+    });
+
+    this.addButton("Credits", { x: center().x, y: 550 }, () => {
+      play("confirm-ui");
+      this.displayCreditsMenu();
+    });
+
+    this.addButton("Quit Game", { x: center().x, y: 650 }, () => {
+      play("confirm-ui");
+      go("createAccount");
+    });
   }
 
   displayLeaderboard() {
