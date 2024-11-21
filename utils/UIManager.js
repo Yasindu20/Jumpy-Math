@@ -413,20 +413,6 @@ class UI {
 
   displayMainMenu() {
     add([sprite("main-background"), scale(1.25)]);
-    // Add particle effects for the main menu background
-    function addParticleEffect() {
-      loop(0.05, () => {
-        add([
-          pos(rand(width()), height()),
-          rect(2, 10),
-          color(rgb(255, rand(150, 255), rand(150, 255))),
-          move(UP, rand(50, 100)),
-          lifespan(1),
-        ]);
-      });
-    }
-
-    addParticleEffect();
     //add the logo the main manu
     add([
       sprite("logo"),
@@ -586,6 +572,133 @@ class UI {
         anchor("left"),
         "leaderboardEntry"
       ]);
+    });
+  }
+
+  displayCreditsMenu() {
+    this.cleanupElements();
+
+    // Use a solid background instead of complex animations
+    add([
+      rect(width(), height()),
+      color(0, 0, 10),  // Deep space blue-black
+    ]);
+
+    // Starry background animation
+    function createStars() {
+      loop(0.1, () => {
+        add([
+          rect(2, 2),
+          pos(rand(0, width()), 0),
+          color(255, 255, 255),
+          opacity(rand(0.1, 0.8)),
+          move(DOWN, rand(50, 200)),
+          lifespan(3),
+          "star"
+        ]);
+      });
+    }
+    createStars();
+
+    // Credits Title
+    add([
+      text("CREDITS", {
+        font: "Round",
+        size: 80,
+        color: rgb(0, 255, 150)
+      }),
+      pos(center().x, 100),
+      anchor("center"),
+      scale(1),
+      {
+        update() {
+          // Subtle pulsing effect
+          const pulse = Math.sin(time() * 3) * 0.1 + 1;
+          this.scale = vec2(pulse, pulse);
+        }
+      }
+    ]);
+
+    // Credits Text
+    const creditsText = [
+      "",
+      "JUMPY MATHS",
+      "An Educational Platformer Adventure",
+      "",
+      "Developer",
+      "Yasindu Dasanga De Mel",
+      "",
+      "Inspired By",
+      "Classic Platformers like Super Mario Bros.",
+      "",
+      "Special Thanks",
+      "Ms. Nideshika Ellepola",
+      "For inspiring this Game Project",
+      "",
+      "Dulminie",
+      "For invaluable Help and support and the Game Idea",
+      "",
+      "Lochana",
+      "For playtesting",
+      "",
+      "Tools and Resources",
+      "Built using Kaboom.js and Firebase",
+      "Fonts by FontSpace",
+      "Sounds by MixKit",
+      "Sprite Images by CraftPix",
+      "",
+      "Contributions",
+      "YouTube Tutorial: 'JavaScript Platformer Game Tutorial'",
+      "by JSLegendDev",
+      "",
+      "AI Support",
+      "ChatGPT and Claude.ai",
+      "",
+      "THANK YOU FOR PLAYING JUMPY MATHS!"
+    ];
+
+    // Create a scrolling credits container
+    const creditsContainer = add([
+      pos(center().x, height()),
+      {
+        update() {
+          this.pos.y -= 50 * dt(); // Scroll speed
+
+          // Reset position when credits scroll off screen
+          if (this.pos.y < -creditsText.length * 50) {
+            this.pos.y = height();
+          }
+        }
+      }
+    ]);
+
+    // Add credits text
+    creditsText.forEach((line, index) => {
+      const textColor = line.includes("JUMPY MATHS") ? rgb(0, 255, 150)
+        : line.includes("Developer") || line.includes("Inspired By") ||
+          line.includes("Special Thanks") || line.includes("Tools") ? rgb(255, 215, 0)
+          : rgb(255, 255, 255);
+
+      const fontSize = line.includes("JUMPY MATHS") ? 48
+        : line.includes("Developer") || line.includes("Inspired By") ||
+          line.includes("Special Thanks") || line.includes("Tools") ? 32
+          : 24;
+
+      creditsContainer.add([
+        text(line, {
+          font: "Round",
+          size: fontSize,
+          color: textColor
+        }),
+        pos(0, index * 50),
+        anchor("center")
+      ]);
+    });
+
+    // Back Button
+    this.addButton("Back", { x: width() - 1200, y: height() - 50 }, () => {
+      play("confirm-ui");
+      go("menu");
     });
   }
 
