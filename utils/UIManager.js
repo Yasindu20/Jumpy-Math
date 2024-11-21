@@ -58,6 +58,7 @@ class UI {
     this.addPauseButton("Main Menu", { x: center().x, y: center().y + 160 }, () => {
       if (confirm("Are you sure you want to return to the main menu?")) {
         this.resumeGame();
+        bgSoundManager.pauseAllSounds(); // Add this line to stop all background sounds
         go("menu");
       }
     });
