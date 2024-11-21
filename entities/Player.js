@@ -446,9 +446,9 @@ export class Player {
     overlay.style.padding = "20px";
     overlay.style.textAlign = "center";
 
-    // Dad Joke Title
+    // Joke Title
     const title = document.createElement("h1");
-    title.textContent = "Dad Joke Unlocked!";
+    title.textContent = "Joke Unlocked!";
     title.style.marginBottom = "30px";
     title.style.fontSize = "24px";
     overlay.appendChild(title);
