@@ -453,7 +453,7 @@ class UI {
     this.addButton("New Game", { x: center().x, y: 250 }, () => go("controls"));
     this.addButton("Leaderboard", { x: center().x, y: 450 }, () => this.displayLeaderboard());
     this.addButton("Credits", { x: center().x, y: 550 }, () => this.displayCreditsMenu());
-    this.addButton("Quit Game", { x: center().x, y: 650 }, () => kaboom().quit());
+    this.addButton("Quit Game", { x: center().x, y: 650 }, () => go("createAccount"));
   }
 
   displayLeaderboard() {
@@ -461,13 +461,31 @@ class UI {
     add([sprite("main-background"), scale(1.25)]);
 
     add([
-      text("Leaderboard", {
+      text("GLOBAL LEADERBOARD", {
         font: "Round",
-        size: 50,
-        color: rgb(255, 215, 0)
+        size: 60,
+        color: rgb(255, 0, 0)  // Start with red
       }),
       anchor("center"),
       pos(center().x, center().y - 300),
+      {
+        update() {
+          // Create a pulsing effect that transitions between red and blue
+          const t = time() * 3;
+          const redIntensity = Math.sin(t) * 0.5 + 0.5;
+          const blueIntensity = Math.cos(t) * 0.5 + 0.5;
+
+          this.color = rgb(
+            255 * redIntensity,   // Red component
+            0,                    // Green component (kept at 0)
+            255 * blueIntensity   // Blue component
+          );
+
+          // Add a subtle scaling effect
+          const pulse = Math.sin(t) * 0.1 + 1;
+          this.scale = vec2(pulse, pulse);
+        }
+      }
     ]);
 
     // Initialize leaderboard listening
@@ -476,11 +494,36 @@ class UI {
     // Create leaderboard container
     const leaderboardContainer = add([
       rect(600, 400),
-      color(0, 0, 0),
-      opacity(0.8),
+      color(10, 10, 30),
+      opacity(0.9),
+      outline(4, rgb(0, 255, 150)),
       anchor("center"),
       pos(center()),
       "leaderboardContainer"
+    ]);
+
+    // Decorative border effects
+    for (let i = 0; i < 10; i++) {
+      add([
+        rect(820, 520),
+        color(0, 255, 150),
+        opacity(0.1 * (10 - i)),
+        anchor("center"),
+        pos(center().x, center().y),
+        z(-1)
+      ]);
+    }
+
+    // Header row
+    const headerRow = add([
+      text("RANK | PLAYER | HIGHEST LEVEL", {
+        font: "Round",
+        size: 24,
+        color: rgb(0, 255, 150)
+      }),
+      pos(center().x, center().y - 220),
+      anchor("center"),
+      "leaderboardHeader"
     ]);
 
     // Update leaderboard display
@@ -494,6 +537,7 @@ class UI {
     });
 
     this.addButton("Back", { x: center().x, y: 620 }, () => {
+      play("confirm-ui");
       go("menu");
       this.cleanupElements();
     });
