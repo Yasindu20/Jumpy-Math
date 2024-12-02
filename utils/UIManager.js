@@ -4,6 +4,9 @@ import { registerUser } from "./auth.js";
 import { loginUser, getUserData } from "./auth.js";
 import { gameSaveManager } from "./gameSaveManager.js";
 import { leaderboardManager } from "./LeaderboardManager.js";
+import { getUsername } from "./auth.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
+import { auth, db } from "./firebase.js";
 
 class UI {
   constructor() {
@@ -358,6 +361,11 @@ class UI {
       const user = await registerUser(username, password);
 
       if (user) {
+        await setDoc(doc(db, "users", user.uid), {
+          email: username,
+          currentLevel: 1
+        }, { merge: true });
+
         alert(`Account created for ${username}!`);
         go("menu");
         play("confirm-ui");
@@ -403,6 +411,10 @@ class UI {
       const user = await loginUser(username, password);
 
       if (user) {
+        await setDoc(doc(db, "users", user.uid), {
+          email: username
+        }, { merge: true });
+
         const data = await getUserData(user.uid);
         if (data) {
           alert(`Welcome back, ${username}!`);
@@ -436,6 +448,93 @@ class UI {
     ])
 
     if (gameSaveManager.isLoggedIn()) {
+      (async () => {
+        const uid = auth.currentUser?.uid;
+        if (uid) {
+          const username = await getUsername(uid);
+          if (username) {
+            // Extract username without email domain
+            const playerName = username.split('@')[0];
+
+            // Animated welcome container
+            const welcomeContainer = add([
+              rect(400, 100),
+              color(0, 100, 0),  // Dark green background
+              opacity(0.7),
+              pos(20, 20),
+              fixed(),
+              z(10),
+              outline(4, rgb(0, 255, 0)),  // Bright green outline
+              "welcomeMessage",  // Add a tag to identify this element
+              {
+                update() {
+                  // Subtle pulsing effect
+                  const pulse = Math.sin(time() * 3) * 0.1 + 1;
+                  this.scale = vec2(pulse, pulse);
+                }
+              }
+            ]);
+
+            // Player icon or avatar placeholder
+            welcomeContainer.add([
+              sprite("star-icon"),  // You can replace with a player avatar sprite
+              pos(10, 10),
+              scale(2)
+            ]);
+
+            // Welcome text with dynamic effects
+            const welcomeText = welcomeContainer.add([
+              text(`ADVENTURE AWAITS, \n${playerName.toUpperCase()}!`, {
+                font: "Round",
+                size: 24,
+                color: rgb(0, 255, 0)  // Bright green text
+              }),
+              pos(100, 20),
+              {
+                update() {
+                  // Text color pulsing effect
+                  const t = time() * 5;
+                  const greenIntensity = Math.sin(t) * 0.5 + 0.5;
+                  this.color = rgb(
+                    0,                    // Red (kept at 0)
+                    255 * greenIntensity, // Green component
+                    0                     // Blue (kept at 0)
+                  );
+
+                  // Subtle text scaling
+                  const pulse = Math.sin(t) * 0.1 + 1;
+                  this.scale = vec2(pulse, pulse);
+                }
+              }
+            ]);
+
+            // Add a particle effect for extra flair
+            const particleLoop = loop(0.1, () => {
+              add([
+                rect(5, 5),
+                pos(rand(20, 420), 20),
+                color(0, 255, 0),
+                opacity(rand(0.3, 0.8)),
+                lifespan(1),
+                move(DOWN, rand(50, 200)),
+                "welcomeParticle"
+              ]);
+            });
+
+            // Store the particle loop for potential cleanup
+            this.uiElements.push(particleLoop);
+          }
+        }
+      })();
+    }
+
+    // Regular menu buttons
+    this.addButton("New Game", { x: center().x, y: 250 }, () => {
+      play("confirm-ui");
+      go("controls");
+    });
+
+    if (gameSaveManager.isLoggedIn()) {
       this.addButton("Load Game", { x: center().x, y: 350 }, async () => {
         const savedState = await gameSaveManager.loadGameState();
         if (savedState && savedState.currentLevel) {
@@ -447,12 +546,6 @@ class UI {
         }
       });
     }
-
-    // Buttons for the main menu
-    this.addButton("New Game", { x: center().x, y: 250 }, () => {
-      play("confirm-ui");
-      go("controls");
-    });
 
     this.addButton("Leaderboard", { x: center().x, y: 450 }, () => {
       play("confirm-ui");
@@ -471,6 +564,8 @@ class UI {
   }
 
   displayLeaderboard() {
+    destroyAll("welcomeMessage");
+    destroyAll("welcomeParticle");
     this.cleanupElements();
     add([sprite("main-background"), scale(1.25)]);
 
@@ -604,6 +699,8 @@ class UI {
   }
 
   displayCreditsMenu() {
+    destroyAll("welcomeMessage");
+    destroyAll("welcomeParticle");
     this.cleanupElements();
 
     // Use a solid background instead of complex animations

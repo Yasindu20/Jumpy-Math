@@ -45,3 +45,17 @@ export async function getUserData(uid) {
         return null;
     }
 }
+
+export async function getUsername(uid) {
+    try {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        if (userDoc.exists()) {
+            // Assuming the email is stored or can be retrieved
+            return userDoc.data().email || auth.currentUser?.email;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching username:", error.message);
+        return null;
+    }
+}
