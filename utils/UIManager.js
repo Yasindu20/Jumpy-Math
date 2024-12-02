@@ -358,20 +358,42 @@ class UI {
     this.addButton("Sign Up", { x: center().x, y: 450 }, async () => {
       const username = usernameInput.value;
       const password = passwordInput.value;
-      const user = await registerUser(username, password);
 
-      if (user) {
-        await setDoc(doc(db, "users", user.uid), {
-          email: username,
-          currentLevel: 1
-        }, { merge: true });
+      // Perform validations
+      if (!username) {
+        alert("Email is required.");
+        return;
+      }
+      if (!password) {
+        alert("Password is required.");
+        return;
+      }
+      if (password.length < 6) {
+        alert("Password should be at least 6 characters.");
+        return;
+      }
 
-        alert(`Account created for ${username}!`);
-        go("menu");
-        play("confirm-ui");
-        this.cleanupElements();
-      } else {
-        alert("Error creating account. Please try again.");
+      // Proceed to register the user
+      try {
+        const user = await registerUser(username, password);
+        if (user) {
+          await setDoc(doc(db, "users", user.uid), {
+            email: username,
+            currentLevel: 1
+          }, { merge: true });
+
+          alert(`Account created for ${username}!`);
+          go("menu");
+          play("confirm-ui");
+          this.cleanupElements();
+        } else {
+          // Generic error message if registration fails
+          alert("Error creating account. Please try again.");
+        }
+      } catch (error) {
+        // Handle unexpected errors
+        console.error("Error during registration:", error);
+        alert("Unexpected error occurred. Please try again later.");
       }
     });
 
