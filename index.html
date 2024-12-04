@@ -18,6 +18,16 @@
             background-color: #222;
         }
 
+        #loading {
+            position: absolute;
+            top: 58%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 44px;
+            color: white;
+            text-align: center;
+        }
+
         canvas {
             display: block;
         }
@@ -51,6 +61,12 @@
 </head>
 
 <body>
+    <div id="loading" style="color: white; text-align: center;">Loading The Jumpy Math...</div>
+    <script>
+        window.addEventListener('load', () => {
+            document.getElementById('loading').style.display = 'none';
+        });
+    </script>
     <script type="module" src="main.js"></script>
 </body>
 
