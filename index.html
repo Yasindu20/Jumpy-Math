@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kaboom Game</title>
+    <!-- Google Font for retro gaming style -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         /* Make the body and canvas cover the full screen */
         body,
@@ -20,12 +22,17 @@
 
         #loading {
             position: absolute;
-            top: 58%;
+            top: 63%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 44px;
             color: white;
             text-align: center;
+            font-family: 'Press Start 2P', sans-serif;
+            opacity: 1;
+            /* Initial opacity for transition effect */
+            transition: opacity 0.5s ease-out;
+            /* Smooth fade-out */
         }
 
         canvas {
@@ -61,12 +68,31 @@
 </head>
 
 <body>
-    <div id="loading" style="color: white; text-align: center;">Loading The Jumpy Math...</div>
+    <!-- Loading screen with animated dots -->
+    <div id="loading" style="color: white; text-align: center;">
+        Loading The Jumpy Math<span id="dots">...</span>
+    </div>
+
     <script>
+        // Animate loading dots
+        let dots = 0;
+        const loadingDots = setInterval(() => {
+            const dotsEl = document.getElementById('dots');
+            dots = (dots + 1) % 4; // Cycle through 0, 1, 2, 3
+            dotsEl.textContent = '.'.repeat(dots);
+        }, 500);
+
+        // Hide loading screen on game load with a fade-out effect
         window.addEventListener('load', () => {
-            document.getElementById('loading').style.display = 'none';
+            clearInterval(loadingDots); // Stop the dots animation
+            const loading = document.getElementById('loading');
+            loading.style.opacity = '0'; // Start fade-out transition
+            setTimeout(() => {
+                loading.style.display = 'none'; // Hide after transition
+            }, 500); // Match the transition duration
         });
     </script>
+
     <script type="module" src="main.js"></script>
 </body>
 
