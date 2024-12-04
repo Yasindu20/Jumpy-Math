@@ -45,10 +45,13 @@ const scenes = {
     UIManager.displayLoginScreen();
   },
   menu: () => {
-    UIManager.displayMainMenu() // Display the main menu UI
+    UIManager.displayMainMenu()
   },
   controls: () => {
-    UIManager.displayControlsMenu() // Display the controls menu UI
+    UIManager.displayControlsMenu()
+  },
+  credits: () => {
+    UIManager.displayCreditsMenu()
   },
 
   // Level 1
@@ -272,4 +275,4 @@ for (const key in scenes) {
 }
 
 //for default starting scene
-go("createAccount")
+go("3")

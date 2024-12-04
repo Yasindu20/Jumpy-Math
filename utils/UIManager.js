@@ -981,7 +981,7 @@ class UI {
 
     onKeyPress("enter", () => {
       play("confirm-ui")
-      go("menu") // Goes back to the main menu
+      go("credits")
     })
   }
 
