@@ -275,4 +275,4 @@ for (const key in scenes) {
 }
 
 //for default starting scene
-go("3")
+go("createAccount")
