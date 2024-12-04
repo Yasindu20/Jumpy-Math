@@ -1,4 +1,4 @@
-// Add this function to fetch the math problem from the API
+// Banana API reference: https://marcconrad.com/uob/banana/api.php
 async function fetchMathProblem() {
   try {
     let response = await fetch('https://marcconrad.com/uob/banana/api.php');
@@ -36,41 +36,41 @@ export class Player {
     currentLevelScene,
     isInTerminalScene
   ) {
-    this.isInTerminalScene = isInTerminalScene //terminal scene check
-    this.currentLevelScene = currentLevelScene //Holds the current level
-    this.makePlayer(posX, posY) //player character coordinates
-    this.speed = speed //player's speed
-    this.jumpForce = jumpForce //player's jump force
-    this.lives = nbLives //player's live count
-    this.previousHeight = this.gameObj.pos.y // Tracks the previous vertical position of the player
-    this.setPlayerControls() //set controls for player
-    this.update() //to handle animations and respawn checks
+    this.isInTerminalScene = isInTerminalScene
+    this.currentLevelScene = currentLevelScene
+    this.makePlayer(posX, posY)
+    this.speed = speed
+    this.jumpForce = jumpForce
+    this.lives = nbLives
+    this.previousHeight = this.gameObj.pos.y
+    this.setPlayerControls()
+    this.update()
   }
 
   makePlayer(x, y) {
-    this.initialX = x //stores the initial X position for respawn
-    this.initialY = y //stores the initial Y position for respawn
+    this.initialX = x
+    this.initialY = y
 
     //add player sprite
     this.gameObj = add([
-      sprite("player", { anim: "idle" }), //standing animation set first
-      area({ shape: new Rect(vec2(0, 3), 8, 8) }), //sets collision area for the player
-      anchor("center"), //anchor to center
-      pos(x, y), //player position on the map
+      sprite("player", { anim: "idle" }),
+      area({ shape: new Rect(vec2(0, 3), 8, 8) }),
+      anchor("center"),
+      pos(x, y),
       scale(4),
-      body(), //enable movement and gravity
-      "player", //tag for player to identify
+      body(),
+      "player",
     ])
   }
 
   //Allows player to pass through one-way tile
   enablePassthrough() {
     this.gameObj.onBeforePhysicsResolve((collision) => {
-      //avoid collision when player is jumping onto a one-way tile platform
+
       if (collision.target.is("passthrough") && this.gameObj.isJumping()) {
         collision.preventResolution()
       }
-      //If player press down key on a passthrough platform, avoid collision
+
       if (collision.target.is("passthrough") && isKeyDown("down")) {
         collision.preventResolution()
       }
@@ -80,36 +80,36 @@ export class Player {
   //coin collection
   enableCoinPickUp() {
     this.gameObj.onCollide("coin", (coin) => {
-      this.coins++ //increase the coin count
-      destroy(coin) //Remove coin from game
-      play("coin") //Play coin collecting sound
+      this.coins++
+      destroy(coin)
+      play("coin")
     })
   }
 
   //Sets up player controls for movement and jumping
   setPlayerControls() {
-    //player move left with run animation
+
     onKeyDown("left", () => {
       if (this.gameObj.paused) return
       if (this.gameObj.curAnim() !== "run") this.gameObj.play("run")
-      this.gameObj.flipX = true //Flip sprite image for left 
-      if (!this.isRespawning) this.gameObj.move(-this.speed, 0) //Move left
+      this.gameObj.flipX = true
+      if (!this.isRespawning) this.gameObj.move(-this.speed, 0)
       this.isMoving = true
     })
 
-    //player Moves right 
+
     onKeyDown("right", () => {
       if (this.gameObj.paused) return
       if (this.gameObj.curAnim() !== "run") this.gameObj.play("run")
-      this.gameObj.flipX = false //no flip for right run
-      if (!this.isRespawning) this.gameObj.move(this.speed, 0) //Move right
+      this.gameObj.flipX = false
+      if (!this.isRespawning) this.gameObj.move(this.speed, 0)
       this.isMoving = true
     })
 
-    //jump control
+
     onKeyPress("space", () => {
       if (this.gameObj.paused) return
-      // Allow jump if within jump count limit
+
       if (this.jumpCount < this.maxJumps) {
         this.gameObj.jump(this.jumpForce);
         play("jump");
@@ -139,15 +139,14 @@ export class Player {
     })
   }
 
-  // Respawns the player when a life a lost
-  // Respawns the player when a life is lost
+
   respawnPlayer() {
-    this.gameObj.pos = vec2(this.initialX, this.initialY); // Reset position to initial coordinates
+    this.gameObj.pos = vec2(this.initialX, this.initialY);
 
     if (this.lives > 0) {
-      this.lives--; // Decrease lives if any are left
+      this.lives--;
       this.isRespawning = true;
-      setTimeout(() => (this.isRespawning = false), 1000); // Disable respawning after 1 second
+      setTimeout(() => (this.isRespawning = false), 1000);
     } else {
       // No lives left; handle revive mechanism
       this.isRespawning = true;
@@ -337,8 +336,8 @@ export class Player {
   //Enables vulnerability to enemy 
   enableMobVunerability() {
     function hitAndRespawn(context) {
-      play("hit", { speed: 1.5 }) //Play hit sound
-      context.respawnPlayer() // Call respawn when hit on enemy
+      play("hit", { speed: 1.5 })
+      context.respawnPlayer()
     }
     this.gameObj.onCollide("fish", () => hitAndRespawn(this))
     this.gameObj.onCollide("spiders", () => hitAndRespawn(this))
@@ -399,6 +398,7 @@ export class Player {
     })
   }
 
+  // API References: https://icanhazdadjoke.com/api
   async fetchDadJoke() {
     try {
       const response = await fetch('https://icanhazdadjoke.com/', {
@@ -427,7 +427,7 @@ export class Player {
       p.paused = true;
     });
 
-    // Create full-screen overlay similar to math problem modal
+    // Create full-screen overlay 
     const overlay = document.createElement("div");
     overlay.id = "dad-joke-modal";
     overlay.style.position = "fixed";
